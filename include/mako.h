@@ -18,6 +18,7 @@
 #include "cursor-shape-v1-client-protocol.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "xdg-activation-v1-client-protocol.h"
+#include "ext-background-effect-v1-client-protocol.h"
 
 struct mako_state;
 
@@ -29,6 +30,7 @@ struct mako_surface {
 	struct wl_surface *surface;
 	struct mako_output *surface_output;
 	struct zwlr_layer_surface_v1 *layer_surface;
+	struct ext_background_effect_surface_v1 *background_effect;
 	struct mako_output *layer_surface_output;
 	struct wl_callback *frame_callback;
 	bool configured;
@@ -58,6 +60,7 @@ struct mako_state {
 	struct zwlr_layer_shell_v1 *layer_shell;
 	struct xdg_activation_v1 *xdg_activation;
 	struct wp_cursor_shape_manager_v1 *cursor_shape_manager;
+	struct ext_background_effect_manager_v1 *background_effect_manager;
 	struct wl_list outputs; // mako_output::link
 	struct wl_list seats; // mako_seat::link
 
