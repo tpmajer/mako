@@ -629,6 +629,10 @@ static void send_frame(struct mako_surface *surface) {
 			wl_callback_destroy(surface->frame_callback);
 			surface->frame_callback = NULL;
 		}
+		if (surface->background_effect != NULL) {
+			ext_background_effect_surface_v1_destroy(surface->background_effect);
+			surface->background_effect = NULL;
+		}
 		if (surface->surface != NULL) {
 			wl_surface_destroy(surface->surface);
 			surface->surface = NULL;
@@ -657,6 +661,12 @@ static void send_frame(struct mako_surface *surface) {
 
 		surface->surface = wl_compositor_create_surface(state->compositor);
 		wl_surface_add_listener(surface->surface, &surface_listener, surface);
+
+		if (state->background_effect_manager != NULL) {
+			surface->background_effect =
+				ext_background_effect_manager_v1_get_background_effect(
+					state->background_effect_manager, surface->surface);
+		}
 
 		surface->layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 			state->layer_shell, surface->surface, wl_output,

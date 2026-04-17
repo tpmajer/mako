@@ -8,6 +8,9 @@ void destroy_surface(struct mako_surface *surface) {
 	if (surface->layer_surface != NULL) {
 		zwlr_layer_surface_v1_destroy(surface->layer_surface);
 	}
+	if (surface->background_effect != NULL) {
+		ext_background_effect_surface_v1_destroy(surface->background_effect);
+	}
 	if (surface->surface != NULL) {
 		wl_surface_destroy(surface->surface);
 	}
