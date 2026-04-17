@@ -439,6 +439,9 @@ static void handle_global(void *data, struct wl_registry *registry,
 	} else if (strcmp(interface, wp_cursor_shape_manager_v1_interface.name) == 0) {
 		state->cursor_shape_manager = wl_registry_bind(registry, name,
 			&wp_cursor_shape_manager_v1_interface, 1);
+	} else if (strcmp(interface, ext_background_effect_manager_v1_interface.name) == 0) {
+		state->background_effect_manager = wl_registry_bind(registry, name,
+			&ext_background_effect_manager_v1_interface, 1);
 	}
 }
 
@@ -538,6 +541,9 @@ void finish_wayland(struct mako_state *state) {
 	}
 	if (state->cursor_shape_manager != NULL) {
 		wp_cursor_shape_manager_v1_destroy(state->cursor_shape_manager);
+	}
+	if (state->background_effect_manager != NULL) {
+		ext_background_effect_manager_v1_destroy(state->background_effect_manager);
 	}
 
 	if (state->cursor.theme != NULL) {
