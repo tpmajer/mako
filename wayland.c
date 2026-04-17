@@ -574,6 +574,37 @@ static struct wl_region *get_input_region(struct mako_surface *surface) {
 	return region;
 }
 
+static struct wl_region *get_blur_region(struct mako_surface *surface) {
+	struct wl_region *region =
+		wl_compositor_create_region(surface->state->compositor);
+
+	struct mako_notification *notif;
+	wl_list_for_each(notif, &surface->state->notifications, link) {
+		if (notif->surface != surface) {
+			continue;
+		}
+		struct mako_hotspot *hs = &notif->hotspot;
+		struct mako_style *style = &notif->style;
+
+		int32_t r = style->border_radius.top;
+		if (style->border_radius.right > r) r = style->border_radius.right;
+		if (style->border_radius.bottom > r) r = style->border_radius.bottom;
+		if (style->border_radius.left > r) r = style->border_radius.left;
+
+		if (r == 0) {
+			wl_region_add(region, hs->x, hs->y, hs->width, hs->height);
+		} else {
+			wl_region_add(region, hs->x + r, hs->y,
+				hs->width - 2 * r, hs->height);
+			wl_region_add(region, hs->x, hs->y + r,
+				r, hs->height - 2 * r);
+			wl_region_add(region, hs->x + hs->width - r, hs->y + r,
+				r, hs->height - 2 * r);
+		}
+	}
+	return region;
+}
+
 static struct mako_output *get_configured_output(struct mako_surface *surface) {
 	const char *output_name = surface->configured_output;
 	if (strcmp(output_name, "") == 0) {
@@ -721,6 +752,13 @@ static void send_frame(struct mako_surface *surface) {
 	struct wl_region *input_region = get_input_region(surface);
 	wl_surface_set_input_region(surface->surface, input_region);
 	wl_region_destroy(input_region);
+
+	if (surface->background_effect != NULL) {
+		struct wl_region *blur_region = get_blur_region(surface);
+		ext_background_effect_surface_v1_set_blur_region(
+			surface->background_effect, blur_region);
+		wl_region_destroy(blur_region);
+	}
 
 	wl_surface_set_buffer_scale(surface->surface, scale);
 	wl_surface_damage_buffer(surface->surface, 0, 0, INT32_MAX, INT32_MAX);
