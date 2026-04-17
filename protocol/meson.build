@@ -22,6 +22,7 @@ protocols = [
 	wl_protocol_dir / 'staging/xdg-activation/xdg-activation-v1.xml',
 	wl_protocol_dir / 'unstable/tablet/tablet-unstable-v2.xml',
 	'wlr-layer-shell-unstable-v1.xml',
+	'ext-background-effect-v1.xml',
 ]
 
 protocols_src = []
