@@ -1,5 +1,7 @@
 # mako
 
+> **Fork:** Adds background blur support via `ext-background-effect-v1`. Implemented with [Claude](https://claude.ai) — I'm not a programmer.
+
 A lightweight notification daemon for Wayland. Works on Sway.
 
 <p align="center">
