@@ -1,6 +1,40 @@
-# mako
+> **Fork:** This is a fork of [mako](https://github.com/emersion/mako) which adds background blur support via `ext-background-effect-v1`, implemented with [Claude](https://claude.ai).
 
-> **Fork:** Adds background blur support via `ext-background-effect-v1`. Implemented with [Claude](https://claude.ai) — I'm not a programmer.
+## NixOS Installation
+
+Add this fork as a flake input:
+
+```nix
+# flake.nix
+inputs = {
+  mako-blur.url = "github:tpmajer/mako/blur";
+};
+```
+
+Pass `inputs` via `specialArgs` and use the package in your NixOS module:
+
+```nix
+{ inputs, pkgs, ... }:
+{
+  environment.systemPackages = [
+    inputs.mako-blur.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ];
+}
+```
+
+Alternatively, apply the overlay to override `pkgs.mako` system-wide:
+
+```nix
+# flake.nix outputs
+nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+  modules = [
+    { nixpkgs.overlays = [ inputs.mako-blur.overlays.default ]; }
+    # ...
+  ];
+};
+```
+
+# mako
 
 A lightweight notification daemon for Wayland. Works on Sway.
 
