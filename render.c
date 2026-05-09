@@ -343,6 +343,7 @@ void render(struct mako_surface *surface, struct pool_buffer *buffer, int scale,
 	cairo_t *cairo = buffer->cairo;
 
 	*rendered_width = *rendered_height = 0;
+	surface->has_hidden_hotspot = false;
 
 	if (wl_list_empty(&state->notifications)) {
 		return;
@@ -470,8 +471,13 @@ void render(struct mako_surface *surface, struct pool_buffer *buffer, int scale,
 			format_text(style->format, text, format_hidden_text, &data);
 
 			int hidden_height = render_notification(
-				cairo, state, surface, style, text, NULL, total_height, scale, NULL, 0);
+				cairo, state, surface, style, text, NULL, total_height, scale,
+				&hidden_notif->hotspot, 0);
 			free(text);
+
+			surface->hidden_hotspot = hidden_notif->hotspot;
+			surface->hidden_border_radius = style->border_radius;
+			surface->has_hidden_hotspot = true;
 
 			total_height += hidden_height;
 			pending_bottom_margin = style->margin.bottom;

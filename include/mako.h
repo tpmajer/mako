@@ -14,6 +14,7 @@
 
 #include "config.h"
 #include "event-loop.h"
+#include "notification.h"
 #include "pool-buffer.h"
 #include "cursor-shape-v1-client-protocol.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
@@ -44,6 +45,10 @@ struct mako_surface {
 	int32_t width, height;
 	struct pool_buffer buffers[2];
 	struct pool_buffer *current_buffer;
+
+	bool has_hidden_hotspot;
+	struct mako_hotspot hidden_hotspot;
+	struct mako_directional hidden_border_radius;
 };
 
 struct mako_state {

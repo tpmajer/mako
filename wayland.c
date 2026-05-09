@@ -574,6 +574,25 @@ static struct wl_region *get_input_region(struct mako_surface *surface) {
 	return region;
 }
 
+static void add_hotspot_blur_rect(struct wl_region *region,
+		struct mako_hotspot *hs, struct mako_directional *br) {
+	int32_t r = br->top;
+	if (br->right > r) r = br->right;
+	if (br->bottom > r) r = br->bottom;
+	if (br->left > r) r = br->left;
+
+	if (r == 0) {
+		wl_region_add(region, hs->x, hs->y, hs->width, hs->height);
+	} else {
+		wl_region_add(region, hs->x + r, hs->y,
+			hs->width - 2 * r, hs->height);
+		wl_region_add(region, hs->x, hs->y + r,
+			r, hs->height - 2 * r);
+		wl_region_add(region, hs->x + hs->width - r, hs->y + r,
+			r, hs->height - 2 * r);
+	}
+}
+
 static struct wl_region *get_blur_region(struct mako_surface *surface) {
 	struct wl_region *region =
 		wl_compositor_create_region(surface->state->compositor);
@@ -583,25 +602,15 @@ static struct wl_region *get_blur_region(struct mako_surface *surface) {
 		if (notif->surface != surface) {
 			continue;
 		}
-		struct mako_hotspot *hs = &notif->hotspot;
-		struct mako_style *style = &notif->style;
-
-		int32_t r = style->border_radius.top;
-		if (style->border_radius.right > r) r = style->border_radius.right;
-		if (style->border_radius.bottom > r) r = style->border_radius.bottom;
-		if (style->border_radius.left > r) r = style->border_radius.left;
-
-		if (r == 0) {
-			wl_region_add(region, hs->x, hs->y, hs->width, hs->height);
-		} else {
-			wl_region_add(region, hs->x + r, hs->y,
-				hs->width - 2 * r, hs->height);
-			wl_region_add(region, hs->x, hs->y + r,
-				r, hs->height - 2 * r);
-			wl_region_add(region, hs->x + hs->width - r, hs->y + r,
-				r, hs->height - 2 * r);
-		}
+		add_hotspot_blur_rect(region, &notif->hotspot,
+			&notif->style.border_radius);
 	}
+
+	if (surface->has_hidden_hotspot) {
+		add_hotspot_blur_rect(region, &surface->hidden_hotspot,
+			&surface->hidden_border_radius);
+	}
+
 	return region;
 }
 
