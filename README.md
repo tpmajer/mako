@@ -7,7 +7,7 @@ Add this fork as a flake input:
 ```nix
 # flake.nix
 inputs = {
-  mako-blur.url = "github:tpmajer/mako/blur";
+  mako-blur.url = "github:tpmajer/mako/flake";
 };
 ```
 
