@@ -66,6 +66,7 @@ struct mako_state {
 	struct xdg_activation_v1 *xdg_activation;
 	struct wp_cursor_shape_manager_v1 *cursor_shape_manager;
 	struct ext_background_effect_manager_v1 *background_effect_manager;
+	bool blur_supported;
 	struct wl_list outputs; // mako_output::link
 	struct wl_list seats; // mako_seat::link
 

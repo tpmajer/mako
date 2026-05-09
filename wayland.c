@@ -411,6 +411,17 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 	.closed = layer_surface_handle_closed,
 };
 
+static void background_effect_manager_handle_capabilities(void *data,
+		struct ext_background_effect_manager_v1 *manager, uint32_t flags) {
+	struct mako_state *state = data;
+	state->blur_supported =
+		(flags & EXT_BACKGROUND_EFFECT_MANAGER_V1_CAPABILITY_BLUR) != 0;
+}
+
+static const struct ext_background_effect_manager_v1_listener
+		background_effect_manager_listener = {
+	.capabilities = background_effect_manager_handle_capabilities,
+};
 
 static void handle_global(void *data, struct wl_registry *registry,
 		uint32_t name, const char *interface, uint32_t version) {
@@ -442,6 +453,9 @@ static void handle_global(void *data, struct wl_registry *registry,
 	} else if (strcmp(interface, ext_background_effect_manager_v1_interface.name) == 0) {
 		state->background_effect_manager = wl_registry_bind(registry, name,
 			&ext_background_effect_manager_v1_interface, 1);
+		ext_background_effect_manager_v1_add_listener(
+			state->background_effect_manager,
+			&background_effect_manager_listener, state);
 	}
 }
 
@@ -738,6 +752,12 @@ static void send_frame(struct mako_surface *surface) {
 		zwlr_layer_surface_v1_set_margin(surface->layer_surface,
 			style->outer_margin.top, style->outer_margin.right,
 			style->outer_margin.bottom, style->outer_margin.left);
+		if (surface->background_effect != NULL && state->blur_supported) {
+			struct wl_region *blur_region = get_blur_region(surface);
+			ext_background_effect_surface_v1_set_blur_region(
+				surface->background_effect, blur_region);
+			wl_region_destroy(blur_region);
+		}
 		wl_surface_commit(surface->surface);
 
 		// Now we're going to bail without drawing anything. This gives the
@@ -762,7 +782,7 @@ static void send_frame(struct mako_surface *surface) {
 	wl_surface_set_input_region(surface->surface, input_region);
 	wl_region_destroy(input_region);
 
-	if (surface->background_effect != NULL) {
+	if (surface->background_effect != NULL && state->blur_supported) {
 		struct wl_region *blur_region = get_blur_region(surface);
 		ext_background_effect_surface_v1_set_blur_region(
 			surface->background_effect, blur_region);
